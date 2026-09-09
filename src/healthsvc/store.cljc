@@ -16,8 +16,10 @@
              proposed as-of day must fall inside.
     record — a committed operating record (approved staffing plan) —
              written ONLY via commit-record!.
-    ledger — append-only audit trail, commit or hold."
-  )
+    ledger — append-only audit trail, commit or hold. Entries are chained
+             by `healthsvc.ledger`, so a dropped or reordered entry is
+             detectable; `append-ledger!` is the only way in."
+  (:require [healthsvc.ledger :as ledger]))
 
 (defprotocol Store
   (client [s client-id])
@@ -42,7 +44,7 @@
   (commit-record! [s record]
     (swap! a update :records (fnil conj []) record) s)
   (append-ledger! [s fact]
-    (swap! a update :ledger (fnil conj []) fact) s))
+    (swap! a update :ledger #(ledger/append (or % []) fact)) s))
 
 (defn mem-store
   ([] (mem-store {}))
