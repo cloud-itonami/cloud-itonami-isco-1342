@@ -21,6 +21,8 @@
             [langgraph.checkpoint :as cp]
             [healthsvc.advisor :as advisor]
             [healthsvc.governor :as governor]
+            [healthsvc.ledger :as ledger]
+            [healthsvc.phase :as phase]
             [healthsvc.store :as store]))
 
 (defn build-graph
@@ -53,24 +55,28 @@
                         :audit [{:node :govern :verdict v}]})))
       (g/add-node :decide
                    (fn [{:keys [verdict]}]
-                     {:disposition (cond
-                                     (:hard? verdict) :hold
-                                     (:escalate? verdict) :request-approval
-                                     :else :commit)}))
+                     {:disposition (phase/of-verdict verdict)}))
       (g/add-node :request-approval (fn [s] s))
       (g/add-node :commit
-                   (fn [{:keys [request proposal]}]
+                   (fn [{:keys [request proposal disposition]}]
                      (let [record {:client-id (:client-id request)
                                     :op (:op proposal)
                                     :unit-id (:unit-id proposal)
-                                    :payload proposal}]
+                                    :payload proposal}
+                           ;; Reached from :request-approval means a human
+                           ;; resumed the thread; reached directly means the
+                           ;; governor admitted it. The ledger has to be able
+                           ;; to tell a waiver a human signed from one the
+                           ;; actor took itself.
+                           approved-by (if (phase/approved-commit? disposition)
+                                         :human :actor)]
                        (store/commit-record! store record)
-                       (store/append-ledger! store {:disposition :commit :record record})
+                       (store/append-ledger! store (ledger/commit-entry record approved-by))
                        {:record record
-                        :audit [{:node :commit :record record}]})))
+                        :audit [{:node :commit :record record :approved-by approved-by}]})))
       (g/add-node :hold
                    (fn [{:keys [verdict]}]
-                     (store/append-ledger! store {:disposition :hold :verdict verdict})
+                     (store/append-ledger! store (ledger/hold-entry verdict))
                      {:audit [{:node :hold :verdict verdict}]}))
       (g/set-entry-point :intake)
       (g/add-edge :intake :advise)
