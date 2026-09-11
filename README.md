@@ -85,11 +85,11 @@ one the actor took itself.
 
 ## Running it
 
-    clojure -M:test    # unit tests
-    clojure -M:sim     # governed-scenario harness
-    clojure -M:lint    # clj-kondo, errors fail
+    kbb -M:test    # unit tests
+    kbb -M:sim     # governed-scenario harness
+    kbb -M:lint    # clj-kondo, errors fail
 
-`clojure -M:sim` runs a table of 25 scenarios through the **real** graph and
+`kbb -M:sim` runs a table of 25 scenarios through the **real** graph and
 exits non-zero unless every one reaches its declared phase, no refusal wrote
 a record anyway, every ledger verifies, **and at least one refusal was
 demonstrated**. A table that has stopped exercising the governor is reported
