@@ -1,7 +1,7 @@
 (ns healthsvc.governor
   "HealthServicesManagersGovernor — the independent safety/traceability layer
   for the ISCO-08 1342 community health services managers actor (itonami actor
-  pattern, ADR-2607011000 / CLAUDE.md Actors section). Care-unit twist: a
+  pattern, ADR-2607011000 / AGENTS.md Actors section). Care-unit twist: a
   proposed staffing plan's patient-per-staff ratio is arithmetic division
   checked against the registered ceiling, and the plan's as-of day must fall
   inside the unit's registered operating-licence window — patient safety
