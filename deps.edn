@@ -1,6 +1,8 @@
 {:paths ["src"]
  :deps {io.github.kotoba-lang/langgraph
-        {:git/sha "5b4e5e70837b849b14b6a5800894e3be202ad5fa"}}
+        {:git/url "https://github.com/kotoba-lang/kotoba.git"
+         :git/sha "4bf68e1a1b205674c70f386d59e430801fae3572"
+         :deps/root "lib/kotoba.langgraph"}}
  :aliases
  {
   ;; clj-kondo from deps (no binary), errors fail CI. Added because this repo
